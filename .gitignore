@@ -147,7 +147,7 @@ cython_debug/
 discord.log
 
 # cache
-cache/
+*.wav
 
 # config
 config.json
