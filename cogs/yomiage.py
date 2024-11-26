@@ -51,6 +51,7 @@ class Yomiage(commands.Cog, name="yomiage"):
           },
           'audioConfig': {
             'audioEncoding': 'LINEAR16',
+            'speakingRate': 1.4,
           }
         }
 
