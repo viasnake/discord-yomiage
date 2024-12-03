@@ -1,10 +1,12 @@
 import asyncio
+import base64
 import discord
+import hashlib
+import re
+import requests
+
 from discord.ext import commands
 from discord.ext.commands import Context
-import requests
-import base64
-import hashlib
 
 class Yomiage(commands.Cog, name="yomiage"):
     def __init__(self, bot):
@@ -29,6 +31,19 @@ class Yomiage(commands.Cog, name="yomiage"):
             return
         if len(context.content) > 100:
             return
+        if any(
+            word in context.content
+            for word in ["http", "www.", ".com", ".net", ".org", ".jp", "@"]
+        ):
+            return
+
+        # Replace special characters
+        context.content = context.content.replace("\n", "")
+        context.content = context.content.replace("\r", "")
+        context.content = context.content.replace("\t", "")
+        # Remove the last punctuation mark
+        regex = r"([。、，．,.!！?？:；（）{}\[\]・…〜//--]+)$"
+        context.content = re.sub(regex, "", context.content, "", context.content[::-1], 1)[::-1]
 
         # Generate the audio
         generated_audio = await self.synthesize(context.content)
