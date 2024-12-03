@@ -1,3 +1,4 @@
+import asyncio
 import discord
 from discord.ext import commands
 from discord.ext.commands import Context
@@ -29,8 +30,14 @@ class Yomiage(commands.Cog, name="yomiage"):
         if len(context.content) > 100:
             return
 
-        #
+        # Generate the audio
         generated_audio = await self.synthesize(context.content)
+
+        # Wait until the bot finishes playing the current audio
+        while context.guild.voice_client.is_playing():
+            await asyncio.sleep(1)
+
+        # Play the audio
         context.guild.voice_client.play(discord.FFmpegPCMAudio(generated_audio))
 
     async def synthesize(self, text: str) -> str:
