@@ -41,9 +41,6 @@ class Yomiage(commands.Cog, name="yomiage"):
         context.content = context.content.replace("\n", "")
         context.content = context.content.replace("\r", "")
         context.content = context.content.replace("\t", "")
-        # Remove the last punctuation mark
-        regex = r"([。、，．,.!！?？:；（）{}\[\]・…〜//--]+)$"
-        context.content = re.sub(regex, "", context.content, "", context.content[::-1], 1)[::-1]
 
         # Generate the audio
         generated_audio = await self.synthesize(context.content)
