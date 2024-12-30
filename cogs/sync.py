@@ -3,7 +3,7 @@ from discord.ext.commands import Context
 
 
 #
-class Sync(commands.Cog, name="Sync"):
+class Sync(commands.Cog, name="sync"):
 
     #
     def __init__(self, bot):
