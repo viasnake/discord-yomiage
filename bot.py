@@ -94,7 +94,7 @@ async def status_task() -> None:
     """
     Setup the game status task of the bot.
     """
-    statuses = ["2024/11/23 v1"]
+    statuses = ["読み上げ"]
     await bot.change_presence(activity=discord.Game(random.choice(statuses)))
 
 
