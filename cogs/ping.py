@@ -21,5 +21,6 @@ class Ping(commands.Cog, name="ping"):
         await context.send(f"Pong! {round(self.bot.latency * 1000)}ms")
 
 
-async def setup(bot):
+#
+async def setup(bot) -> None:
     await bot.add_cog(Ping(bot))

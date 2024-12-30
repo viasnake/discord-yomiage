@@ -61,5 +61,5 @@ class Sync(commands.Cog, name="sync"):
 
 
 #
-async def setup(bot):
+async def setup(bot) -> None:
     await bot.add_cog(Sync(bot))

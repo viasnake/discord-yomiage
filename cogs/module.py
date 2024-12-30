@@ -73,5 +73,5 @@ class Module(commands.Cog, name="module"):
         await context.send(f"Successfully reloaded the `{module}` module.")
 
 #
-async def setup(bot):
+async def setup(bot) -> None:
     await bot.add_cog(Module(bot))

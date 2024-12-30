@@ -37,5 +37,5 @@ class Help(commands.Cog, name="help"):
 
 
 #
-async def setup(bot):
+async def setup(bot) -> None:
     await bot.add_cog(Help(bot))

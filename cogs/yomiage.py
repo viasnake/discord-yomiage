@@ -136,5 +136,5 @@ class Yomiage(commands.Cog, name="yomiage"):
 
 
 #
-async def setup(bot):
+async def setup(bot) -> None:
     await bot.add_cog(Yomiage(bot))
