@@ -5,7 +5,6 @@ import platform
 import random
 import sys
 
-import Cloudflare
 import discord
 from discord.ext import tasks
 from discord.ext.commands import Bot, Context
@@ -90,11 +89,7 @@ class Bot(commands.Bot):
             description=config["description"],
             intents=intents,
         )
-
-        # Set the logger
         self.logger = logger
-
-        # Set the config
         self.config = config
 
     #
