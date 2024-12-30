@@ -1,17 +1,20 @@
 import asyncio
 import base64
-import discord
 import hashlib
-import re
 import requests
 
+import discord
 from discord.ext import commands
 from discord.ext.commands import Context
 
+#
 class Yomiage(commands.Cog, name="yomiage"):
+
+    #
     def __init__(self, bot):
         self.bot = bot
 
+    #
     @commands.Cog.listener("on_message")
     async def yomiage(self, context: Context) -> None:
         # Check if the message is valid
@@ -20,12 +23,6 @@ class Yomiage(commands.Cog, name="yomiage"):
             context.channel.name.startswith(channel_name)
             for channel_name in ALLOWED_CHANNEL_NAMES
         ):
-            return
-        if context.content.startswith("!"):
-            return
-        if context.author.bot:
-            return
-        if context.mentions:
             return
         if context.guild.voice_client is None:
             return
