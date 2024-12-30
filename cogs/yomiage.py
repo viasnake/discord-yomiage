@@ -134,6 +134,28 @@ class Yomiage(commands.Cog, name="yomiage"):
         await context.guild.voice_client.disconnect()
         await context.send("Disconnected.")
 
+    # auto disconnect
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+
+        # Check if the bot is connected to a voice channel
+        if member.guild.voice_client is None:
+            return
+
+        # Check if the member is the only one in the channel
+        if before.channel is None:
+            return
+
+        # Check if the member moved to a different channel
+        if before.channel != after.channel:
+
+            # Disconnect if the bot is the only one in the channel
+            if len(before.channel.members) == 1:
+                await before.channel.guild.voice_client.disconnect()
+
+            # Disconnect if all members is bot
+            if all(member.bot for member in before.channel.members):
+                await before.channel.guild.voice_client.disconnect()
 
 #
 async def setup(bot) -> None:
