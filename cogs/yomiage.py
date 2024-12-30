@@ -108,7 +108,6 @@ class Yomiage(commands.Cog, name="yomiage"):
     @commands.hybrid_command(
         name="connect",
         description="Connect to the voice channel",
-        aliases=["join"],
     )
     async def connect(self, context: Context):
         if context.author.voice is None:
@@ -125,7 +124,6 @@ class Yomiage(commands.Cog, name="yomiage"):
     @commands.hybrid_command(
         name="disconnect",
         description="Disconnect from the voice channel",
-        aliases=["leave"],
     )
     async def disconnect(self, context: Context):
         if context.guild.voice_client is None:

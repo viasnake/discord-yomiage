@@ -9,7 +9,6 @@ class Sync(commands.Cog, name="Sync"):
     @commands.hybrid_command(
         name="sync",
         description="Sync command",
-        aliases=["s"],
     )
     async def sync(self, context: Context) -> None:
         """
