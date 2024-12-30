@@ -49,6 +49,7 @@ class Yomiage(commands.Cog, name="yomiage"):
         # Play the audio
         context.guild.voice_client.play(discord.FFmpegPCMAudio(generated_audio))
 
+    #
     async def synthesize(self, text: str) -> str:
         API_ENDPOINT = "https://texttospeech.googleapis.com/v1beta1/text:synthesize"
 
@@ -92,6 +93,7 @@ class Yomiage(commands.Cog, name="yomiage"):
         return file_path
 
 
+    #
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         if member.guild.voice_client is None:
@@ -102,6 +104,7 @@ class Yomiage(commands.Cog, name="yomiage"):
             if len(before.channel.members) == 1:
                 await before.channel.guild.voice_client.disconnect()
 
+    #
     @commands.hybrid_command(
         name="connect",
         description="Connect to the voice channel",
@@ -118,6 +121,7 @@ class Yomiage(commands.Cog, name="yomiage"):
         await context.author.voice.channel.connect()
         await context.send(f"Connected to {context.author.voice.channel.name}")
 
+    #
     @commands.hybrid_command(
         name="disconnect",
         description="Disconnect from the voice channel",
@@ -131,5 +135,6 @@ class Yomiage(commands.Cog, name="yomiage"):
         await context.send("Disconnected.")
 
 
+#
 async def setup(bot):
     await bot.add_cog(Yomiage(bot))
