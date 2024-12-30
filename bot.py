@@ -78,7 +78,7 @@ logger.addHandler(file_handler)
 
 
 #
-class Bot(commands.Bot):
+class Bot(Bot):
 
     #
     def __init__(self):
@@ -101,7 +101,7 @@ class Bot(commands.Bot):
         self.logger.info(f"Python version: {platform.python_version()}")
         self.logger.info(f"Running on: {platform.system()} {platform.release()} ({os.name})")
 
-        # Load the cogs
+        #
         await self.load_cogs()
 
         # Start the status task
@@ -138,14 +138,10 @@ class Bot(commands.Bot):
             )
 
         # Log the command in DMs
-        if context.guild is None:
+        else:
             self.logger.info(
                 f"Executed {executed_command} command by {context.author} (ID: {context.author.id}) in DMs"
             )
-
-        # Log the command. But why is this here?
-        self.logger.error("This should not have happened.")
-        self.logger.info(f"Executed {executed_command} command in {context.guild.name} (ID: {context.guild.id}) by {context.author} (ID: {context.author.id})")
 
     #
     async def on_command_error(self, context: Context, exception: Exception) -> None:
@@ -172,7 +168,8 @@ class Bot(commands.Bot):
     async def status_task(self) -> None:
 
         # Set the status
-        await self.change_presence(activity=discord.Game(name=random.choice(config["status"])))
+        statuses = ["Testing"]
+        await self.change_presence(activity=discord.Game(name=random.choice(statuses)))
 
     #
     @status_task.before_loop
