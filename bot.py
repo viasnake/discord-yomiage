@@ -1,20 +1,13 @@
-import json
 import logging
 import os
 import platform
 import random
-import sys
+
+from config import ConfigManager
 
 import discord
 from discord.ext import tasks
 from discord.ext.commands import Bot, Context
-
-# Check if the config file exists
-if not os.path.isfile(f"{os.path.realpath(os.path.dirname(__file__))}/config.json"):
-    sys.exit("'config.json' not found.")
-else:
-    with open(f"{os.path.realpath(os.path.dirname(__file__))}/config.json") as file:
-        config = json.load(file)
 
 # Initialize the bot
 intents = discord.Intents.default()
@@ -78,25 +71,25 @@ logger.addHandler(file_handler)
 
 
 #
-class Bot(Bot):
+class Discord(Bot):
 
     #
     def __init__(self):
 
         # Initialize the bot
+        self.logger = logger
+        self.config = ConfigManager().load_config()
         super().__init__(
-            command_prefix=config["prefix"],
-            description=config["description"],
+            command_prefix=self.config["prefix"],
+            description=self.config["description"],
             intents=intents,
         )
-        self.logger = logger
-        self.config = config
 
     #
     async def setup_hook(self) -> None:
 
         # Output the bot information
-        self.logger.info("Logged in as {self.user.name}")
+        self.logger.info(f"Logged in as {self.user.name}")
         self.logger.info(f"discord.py API version: {discord.__version__}")
         self.logger.info(f"Python version: {platform.python_version()}")
         self.logger.info(f"Running on: {platform.system()} {platform.release()} ({os.name})")
@@ -180,5 +173,5 @@ class Bot(Bot):
 
 
 # Initialize the bot
-bot = Bot()
-bot.run(config["token"])
+Discord = Discord()
+Discord.run(Discord.config["token"])
