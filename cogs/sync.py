@@ -18,21 +18,15 @@ class Sync(commands.Cog, name="sync"):
     async def sync(self, context: Context, scope: str = "guild") -> None:
 
         #
-        if scope == "guild":
-            self.bot.logger.info("Syncing commands in guild...")
-            await self.bot.tree.sync(guild=context.guild)
-            await context.send("Commands synced in guild.")
-            return
-
-        #
         if scope == "global":
             self.bot.logger.info("Syncing commands globally...")
-            await self.bot.tree.sync()
+            await context.bot.tree.sync()
             await context.send("Commands synced globally.")
             return
 
-        #
-        await context.send("Invalid scope.")
+        self.bot.logger.info("Syncing commands in guild...")
+        await context.bot.tree.sync(guild=context.guild)
+        await context.send("Commands synced in guild.")
 
     #
     @commands.hybrid_command(
@@ -43,21 +37,15 @@ class Sync(commands.Cog, name="sync"):
     async def unsync(self, context: Context, scope: str = "guild") -> None:
 
         #
-        if scope == "guild":
-            self.bot.logger.info("Unsyncing commands in guild...")
-            await self.bot.tree.unsync(guild=context.guild)
-            await context.send("Commands unsynced in guild.")
-            return
-
-        #
         if scope == "global":
             self.bot.logger.info("Unsyncing commands globally...")
             await self.bot.tree.unsync()
             await context.send("Commands unsynced globally.")
             return
 
-        #
-        await context.send("Invalid scope.")
+        self.bot.logger.info("Unsyncing commands in guild...")
+        await self.bot.tree.unsync(guild=context.guild)
+        await context.send("Commands unsynced in guild.")
 
 
 #
