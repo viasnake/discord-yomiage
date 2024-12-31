@@ -2,16 +2,12 @@ import os
 import platform
 import random
 
-import config
-import logger
+from config import ConfigLoader
+from logger import Logger
 
 import discord
 from discord.ext import tasks
 from discord.ext.commands import Bot, Context
-
-# Initialize the bot
-intents = discord.Intents.default()
-intents.message_content = True
 
 
 #
@@ -20,19 +16,24 @@ class Discord(Bot):
     #
     def __init__(self):
 
-        # Initialize the bot
-        self.logger = logger.Logger("Discord")
-        self.config = config.ConfigManager().load_config()
+        #
+        intents = discord.Intents.default()
+        intents.message_content = True
+
+        #
+        self.logger = Logger("Discord")
+        self.config = ConfigLoader()
+
+        #
         super().__init__(
-            command_prefix=self.config["prefix"],
-            description=self.config["description"],
+            command_prefix=self.config.get("prefix"),
             intents=intents,
         )
 
     #
     async def setup_hook(self) -> None:
 
-        # Output the bot information
+        # Log the bot information
         self.logger.info(f"Logged in as {self.user.name}")
         self.logger.info(f"discord.py API version: {discord.__version__}")
         self.logger.info(f"Python version: {platform.python_version()}")
@@ -105,8 +106,11 @@ class Discord(Bot):
     async def status_task(self) -> None:
 
         # Set the status
-        statuses = ["Testing"]
-        await self.change_presence(activity=discord.Game(name=random.choice(statuses)))
+        await self.change_presence(
+            activity=discord.Game(
+                name=random.choice(self.config.get("status"))
+            )
+        )
 
     #
     @status_task.before_loop
@@ -115,7 +119,8 @@ class Discord(Bot):
         # Wait until the bot is ready
         await self.wait_until_ready()
 
+#
+config = ConfigLoader()
 
-# Initialize the bot
-Discord = Discord()
-Discord.run(Discord.config["token"])
+#
+Discord().run(config.get("token"))
