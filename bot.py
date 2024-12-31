@@ -3,7 +3,9 @@ import platform
 import random
 
 from config import ConfigLoader
+from database import DatabaseManager
 from logger import Logger
+from cloudflare import Cloudflare
 
 import discord
 from discord.ext import tasks
@@ -23,6 +25,13 @@ class Discord(Bot):
         #
         self.logger = Logger("Discord")
         self.config = ConfigLoader()
+
+        #
+        client = Cloudflare(
+            api_email=self.config.get("cloudflare_api_email"),
+            api_key=self.config.get("cloudflare_api_key"),
+        )
+        self.database = DatabaseManager(client)
 
         #
         super().__init__(
