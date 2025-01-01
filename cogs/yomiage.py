@@ -63,7 +63,7 @@ class Yomiage(commands.Cog, name="yomiage"):
 
         #
         headers = {
-          'X-Goog-Api-Key': self.bot.config["API_KEY"],
+          'X-Goog-Api-Key': self.bot.config.get("google_api_key"),
           'Content-Type': 'application/json; charset=utf-8'
         }
         data = {
