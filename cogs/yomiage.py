@@ -36,7 +36,7 @@ class Yomiage(commands.Cog, name="yomiage"):
 
         # Check if the message was sent in the target channel
         target_channel_id = await self.get_target_channel_id(context.guild.id)
-        if context.channel.id != target_channel_id or target_channel_id != 0:
+        if context.channel.id != target_channel_id and target_channel_id != 0:
             return
 
         # Synthesize the audio
@@ -97,12 +97,12 @@ class Yomiage(commands.Cog, name="yomiage"):
 
     #
     async def get_target_channel_id(self, guild_id: int) -> int:
-        result = await self.bot.database.get_guild_by_guild_id(guild_id)
+        result = self.bot.database.get_guild_by_guild_id(guild_id)
         return result["target_channel_id"]
 
     #
     async def get_user(self, user_id: int) -> dict:
-        return await self.bot.database.get_user_by_user_id(user_id)
+        return self.bot.database.get_user_by_user_id(user_id)
 
 #
 async def setup(bot) -> None:
