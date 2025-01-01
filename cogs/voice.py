@@ -47,8 +47,8 @@ class Voice(commands.Cog, name="voice"):
 
         # Disconnect from the voice channel
         await context.guild.voice_client.disconnect()
-        self.bot.logger.info(f"Disconnected from {context.guild.voice_client.channel.name}.")
-        await context.send("ボイスチャンネルから切断しました。")
+        self.bot.logger.info(f"Disconnected from {context.author.voice.channel.name}.")
+        await context.send(f"ボイスチャンネルから切断しました。")
 
     #
     @commands.Cog.listener()
