@@ -8,5 +8,5 @@ CREATE TABLE IF NOT EXISTS `users` (
 
 CREATE TABLE IF NOT EXISTS `guilds` (
   `guild_id` INTEGER PRIMARY KEY,
-  `channel_id` INTEGER DEFAULT NULL
+  `target_channel_id` INTEGER DEFAULT '0',
 );

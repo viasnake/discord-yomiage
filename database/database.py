@@ -2,6 +2,7 @@ import os
 import sys
 from cloudflare import Cloudflare
 from config import ConfigLoader
+from logger import Logger
 
 #
 class DatabaseManager:
@@ -16,6 +17,7 @@ class DatabaseManager:
         self.client = client
         self.database_id = config.get("cloudflare_database_id")
         self.account_id = config.get("cloudflare_account_id")
+        self.logger = Logger("DatabaseManager")
 
         #
         self.init_database()
@@ -32,62 +34,107 @@ class DatabaseManager:
             schema = file.read()
 
         #
-        self.client.d1.database.query(
-            database_id=self.database_id,
-            account_id=self.account_id,
-            sql=schema,
-        )
+        try:
+            self.client.d1.database.query(
+                database_id=self.database_id,
+                account_id=self.account_id,
+                sql=schema,
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to initialize the database: {e}")
 
     #
-    def add_user(self, user_id: int) -> None:
-        self.client.d1.database.query(
-            database_id=self.database_id,
-            account_id=self.account_id,
-            sql=f"INSERT INTO users (user_id) VALUES (?)",
-            params=[user_id],
-        )
+    def add_guild(self, guild_id: int) -> None:
+
+        #
+        try:
+            self.client.d1.database.query(
+                database_id=self.database_id,
+                account_id=self.account_id,
+                sql="INSERT INTO guilds (guild_id) VALUES (?)",
+                params=[str(guild_id)],
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to add guild: {e}")
+            return
+
+        #
+        self.logger.info(f"Added guild {guild_id}")
 
     #
-    def get_user(self, user_id: int) -> dict:
-        return self.client.d1.database.query(
-            database_id=self.database_id,
-            account_id=self.account_id,
-            sql=f"SELECT * FROM users WHERE user_id = ?",
-            params=[user_id],
-        )
+    def delete_guild(self, guild_id: int) -> None:
+
+        #
+        try:
+            self.client.d1.database.query(
+                database_id=self.database_id,
+                account_id=self.account_id,
+                sql="DELETE FROM guilds WHERE guild_id = ?",
+                params=[str(guild_id)],
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to delete guild: {e}")
+            return
+
+        #
+        self.logger.info(f"Deleted guild {guild_id}")
 
     #
-    def update_user_voice_languagecode(self, user_id: int, languagecode: str) -> None:
-        self.client.d1.database.query(
-            database_id=self.database_id,
-            account_id=self.account_id,
-            sql=f"UPDATE users SET voice_languagecode = ? WHERE user_id = ?",
-            params=[languagecode, user_id],
-        )
+    def get_guild_by_guild_id(self, guild_id: int) -> dict | None:
+
+        #
+        try:
+            result = self.client.d1.database.query(
+                database_id=self.database_id,
+                account_id=self.account_id,
+                sql="SELECT * FROM guilds WHERE guild_id = ?",
+                params=[str(guild_id)],
+            )
+            result_query = result[0].results
+        except Exception as e:
+            self.logger.error(f"Failed to get guild: {e}")
+            return
+
+        #
+        if len(result_query) == 0:
+            self.logger.error(f"No rows found for guild_id {guild_id}")
+            self.add_guild(guild_id)
+
+        #
+        if len(result_query) > 1:
+            self.logger.error(f"Multiple rows found for guild_id {guild_id}")
+            self.delete_guild(guild_id)
+            self.add_guild(guild_id)
+
+        #
+        return result_query[0]
 
     #
-    def update_user_voice_name(self, user_id: int, name: str) -> None:
-        self.client.d1.database.query(
-            database_id=self.database_id,
-            account_id=self.account_id,
-            sql=f"UPDATE users SET voice_name = ? WHERE user_id = ?",
-            params=[name, user_id],
-        )
+    def get_user_by_user_id(self, user_id: int) -> dict | None:
 
-    #
-    def update_user_audioconfig_speakingrate(self, user_id: int, speakingrate: int) -> None:
-        self.client.d1.database.query(
-            database_id=self.database_id,
-            account_id=self.account_id,
-            sql=f"UPDATE users SET audioconfig_speakingrate = ? WHERE user_id = ?",
-            params=[speakingrate, user_id],
-        )
+        #
+        try:
+            result = self.client.d1.database.query(
+                database_id=self.database_id,
+                account_id=self.account_id,
+                sql=f"SELECT * FROM users WHERE user_id = ?",
+                params=[str(user_id)],
+            )
+            result_query = result[0].results
+        except Exception as e:
+            self.logger.error(f"Failed to get user: {e}")
+            return
 
-    #
-    def update_user_audioconfig_pitch(self, user_id: int, pitch: int) -> None:
-        self.client.d1.database.query(
-            database_id=self.database_id,
-            account_id=self.account_id,
-            sql=f"UPDATE users SET audioconfig_pitch = ? WHERE user_id = ?",
-            params=[pitch, user_id],
-        )
+        #
+        if len(result_query) == 0:
+            self.logger.error(f"No rows found for user_id {user_id}")
+            self.add_user(user_id)
+
+        #
+        if len(result_query) > 1:
+            self.logger.error(f"Multiple rows found for user_id {user_id}")
+            self.delete_user(user_id)
+            self.add_user(user_id)
+
+        #
+        return result_query[0]
