@@ -17,81 +17,92 @@ class Yomiage(commands.Cog, name="yomiage"):
     #
     @commands.Cog.listener("on_message")
     async def yomiage(self, context: Context) -> None:
-        # Check if the message is valid
-        ALLOWED_CHANNEL_NAMES = ["yomiage"]
-        if not any(
-            context.channel.name.startswith(channel_name)
-            for channel_name in ALLOWED_CHANNEL_NAMES
-        ):
+
+        # Check if the message was sent by a bot
+        if context.author.bot:
             return
+
+        # Check if the message was sent by self
+        if context.author.id == self.bot.user.id:
+            return
+
+        # Check if the bot is already connected to a voice channel
         if context.guild.voice_client is None:
             return
-        if len(context.content) > 100:
-            return
-        if any(
-            word in context.content
-            for word in ["http", "www.", ".com", ".net", ".org", ".jp", "@"]
-        ):
+
+        # Check if the message is empty
+        if not context.content:
             return
 
-        # Replace special characters
-        context.content = context.content.replace("\n", "")
-        context.content = context.content.replace("\r", "")
-        context.content = context.content.replace("\t", "")
+        # Check if the message was sent in the target channel
+        target_channel_id = await self.get_target_channel_id(context.guild.id)
+        if context.channel.id != target_channel_id or target_channel_id != 0:
+            return
 
-        # Generate the audio
-        generated_audio = await self.synthesize(context.content)
+        # Synthesize the audio
+        file_path = await self.synthesize(context.content)
 
-        # Wait until the bot finishes playing the current audio
+        # Wait for the audio to finish playing
         while context.guild.voice_client.is_playing():
             await asyncio.sleep(1)
 
         # Play the audio
-        context.guild.voice_client.play(discord.FFmpegPCMAudio(generated_audio))
+        context.guild.voice_client.play(discord.FFmpegPCMAudio(file_path))
 
     #
     async def synthesize(self, text: str) -> str:
+
+        #
         API_ENDPOINT = "https://texttospeech.googleapis.com/v1beta1/text:synthesize"
 
+        #
+        settings = await self.get_user(self.bot.user.id)
+        if settings is None:
+            self.bot.logger.error(f"Failed to get settings for user_id {self.bot.user.id}")
+            return
+
+        #
         headers = {
           'X-Goog-Api-Key': self.bot.config["API_KEY"],
           'Content-Type': 'application/json; charset=utf-8'
         }
-
         data = {
           'input': {
             'text': text
           },
           'voice': {
-            'languageCode': 'ja-JP',
-            'name': 'ja-JP-Wavenet-C',
+            'languageCode': settings["voice_languagecode"],
+            'name': settings["voice_name"],
           },
           'audioConfig': {
             'audioEncoding': 'LINEAR16',
-            'speakingRate': 1.4,
+            'speakingRate': settings["audioconfig_speakingrate"],
+            'pitch': settings["audioconfig_pitch"],
           }
         }
 
-        # cache the audio
-        md5_hash = hashlib.md5(text.encode()).hexdigest()
-        file_path = f"cache/{md5_hash}.wav"
-        try:
-            with open(file_path, "rb") as file:
-                return file_path
-        except FileNotFoundError:
-            response = requests.post(API_ENDPOINT, headers=headers, json=data)
-            response.raise_for_status()
+        # Request the audio
+        response = requests.post(API_ENDPOINT, headers=headers, json=data)
+        response.raise_for_status()
+        audio_data = response.json()["audioContent"]
 
-            # Decode the audio data
-            audio_data = response.json()["audioContent"]
-            audio_bytes = base64.b64decode(audio_data)
+        # Save the audio to a file
+        hash = hashlib.md5(audio_data.encode()).hexdigest()
+        file_path = f"cache/{hash}.wav"
+        with open(file_path, "wb") as file:
+            file.write(base64.b64decode(audio_data))
 
-            # Save the audio to a file
-            with open(file_path, "wb") as file:
-                file.write(audio_bytes)
-
+        #
         return file_path
 
+    #
+    async def get_target_channel_id(self, guild_id: int) -> int:
+        result = await self.bot.database.get_guild_by_guild_id(guild_id)
+        return result["target_channel_id"]
+
+    #
+    async def get_user(self, user_id: int) -> dict:
+        return await self.bot.database.get_user_by_user_id(user_id)
 
 #
 async def setup(bot) -> None:
