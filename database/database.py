@@ -99,15 +99,53 @@ class DatabaseManager:
         if len(result_query) == 0:
             self.logger.error(f"No rows found for guild_id {guild_id}")
             self.add_guild(guild_id)
+            return self.get_guild_by_guild_id(guild_id)
 
         #
         if len(result_query) > 1:
             self.logger.error(f"Multiple rows found for guild_id {guild_id}")
             self.delete_guild(guild_id)
             self.add_guild(guild_id)
+            return self.get_guild_by_guild_id(guild_id)
 
         #
         return result_query[0]
+
+    #
+    def add_user(self, user_id: int) -> None:
+
+        #
+        try:
+            self.client.d1.database.query(
+                database_id=self.database_id,
+                account_id=self.account_id,
+                sql="INSERT INTO users (user_id) VALUES (?)",
+                params=[str(user_id)],
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to add user: {e}")
+            return
+
+        #
+        self.logger.info(f"Added user {user_id}")
+
+    #
+    def delete_user(self, user_id: int) -> None:
+
+        #
+        try:
+            self.client.d1.database.query(
+                database_id=self.database_id,
+                account_id=self.account_id,
+                sql="DELETE FROM users WHERE user_id = ?",
+                params=[str(user_id)],
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to delete user: {e}")
+            return
+
+        #
+        self.logger.info(f"Deleted user {user_id}")
 
     #
     def get_user_by_user_id(self, user_id: int) -> dict | None:
@@ -129,12 +167,48 @@ class DatabaseManager:
         if len(result_query) == 0:
             self.logger.error(f"No rows found for user_id {user_id}")
             self.add_user(user_id)
+            return self.get_user_by_user_id(user_id)
 
         #
         if len(result_query) > 1:
             self.logger.error(f"Multiple rows found for user_id {user_id}")
             self.delete_user(user_id)
             self.add_user(user_id)
+            return self.get_user_by_user_id(user_id)
 
         #
         return result_query[0]
+
+    def update_user_audioconfig_pitch(self, user_id: int, pitch: float) -> None:
+
+        #
+        try:
+            self.client.d1.database.query(
+                database_id=self.database_id,
+                account_id=self.account_id,
+                sql="UPDATE audioconfig SET pitch = ? WHERE user_id = ?",
+                params=[pitch, str(user_id)],
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to update user audioconfig pitch: {e}")
+            return
+
+        #
+        self.logger.info(f"Updated user audioconfig pitch {user_id}")
+
+    def update_user_audioconfig_speakingrate(self, user_id: int, speakingrate: float) -> None:
+
+        #
+        try:
+            self.client.d1.database.query(
+                database_id=self.database_id,
+                account_id=self.account_id,
+                sql="UPDATE audioconfig SET speakingrate = ? WHERE user_id = ?",
+                params=[speakingrate, str(user_id)],
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to update user audioconfig speakingrate: {e}")
+            return
+
+        #
+        self.logger.info(f"Updated user audioconfig speakingrate {user_id}")
