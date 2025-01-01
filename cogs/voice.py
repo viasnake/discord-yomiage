@@ -1,9 +1,3 @@
-import asyncio
-import base64
-import hashlib
-import requests
-
-import discord
 from discord.ext import commands
 from discord.ext.commands import Context
 
