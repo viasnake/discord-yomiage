@@ -212,3 +212,37 @@ class DatabaseManager:
 
         #
         self.logger.info(f"Updated user audioconfig speakingrate {user_id}")
+
+    def update_voice_languagecode(self, user_id: int, languagecode: str) -> None:
+
+        #
+        try:
+            self.client.d1.database.query(
+                database_id=self.database_id,
+                account_id=self.account_id,
+                sql="UPDATE users SET voice_languagecode = ? WHERE user_id = ?",
+                params=[languagecode, str(user_id)],
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to update user voice languagecode: {e}")
+            return
+
+        #
+        self.logger.info(f"Updated user voice languagecode {user_id}")
+
+    def update_voice_name(self, user_id: int, name: str) -> None:
+
+        #
+        try:
+            self.client.d1.database.query(
+                database_id=self.database_id,
+                account_id=self.account_id,
+                sql="UPDATE users SET voice_name = ? WHERE user_id = ?",
+                params=[name, str(user_id)],
+            )
+        except Exception as e:
+            self.logger.error(f"Failed to update user voice name: {e}")
+            return
+
+        #
+        self.logger.info(f"Updated user voice name {user_id}")
