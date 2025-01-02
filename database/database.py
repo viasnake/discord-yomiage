@@ -186,7 +186,7 @@ class DatabaseManager:
             self.client.d1.database.query(
                 database_id=self.database_id,
                 account_id=self.account_id,
-                sql="UPDATE audioconfig SET pitch = ? WHERE user_id = ?",
+                sql="UPDATE users SET audioconfig_pitch = ? WHERE user_id = ?",
                 params=[pitch, str(user_id)],
             )
         except Exception as e:
@@ -203,7 +203,7 @@ class DatabaseManager:
             self.client.d1.database.query(
                 database_id=self.database_id,
                 account_id=self.account_id,
-                sql="UPDATE audioconfig SET speakingrate = ? WHERE user_id = ?",
+                sql="UPDATE users SET audioconfig_speakingrate = ? WHERE user_id = ?",
                 params=[speakingrate, str(user_id)],
             )
         except Exception as e:
