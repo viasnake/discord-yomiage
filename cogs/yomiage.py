@@ -1,7 +1,7 @@
+import api
 import asyncio
 import base64
 import hashlib
-import requests
 import os
 import discord
 from discord.ext import commands
@@ -53,47 +53,28 @@ class Yomiage(commands.Cog, name="yomiage"):
     async def synthesize(self, text: str) -> str:
 
         #
-        API_ENDPOINT = "https://texttospeech.googleapis.com/v1beta1/text:synthesize"
-
-        #
         settings = await self.get_user(self.bot.user.id)
         if settings is None:
             self.bot.logger.error(f"Failed to get settings for user_id {self.bot.user.id}")
             return
 
         #
-        headers = {
-          'X-Goog-Api-Key': self.bot.config.get("google_api_key"),
-          'Content-Type': 'application/json; charset=utf-8'
-        }
-        data = {
-          'input': {
-            'text': text
-          },
-          'voice': {
-            'languageCode': settings["voice_languagecode"],
-            'name': settings["voice_name"],
-          },
-          'audioConfig': {
-            'audioEncoding': 'LINEAR16',
-            'speakingRate': settings["audioconfig_speakingrate"],
-            'pitch': settings["audioconfig_pitch"],
-          }
-        }
+        voice_languagecode = settings["voice_languagecode"]
+        voice_name = settings["voice_name"]
+        audioconfig_speakingrate = settings["audioconfig_speakingrate"]
+        audioconfig_pitch = settings["audioconfig_pitch"]
 
         # Request the audio
-        response = requests.post(API_ENDPOINT, headers=headers, json=data)
-        response.raise_for_status()
-        audio_data = response.json()["audioContent"]
+        response = api.synthesize(text, voice_languagecode, voice_name, audioconfig_speakingrate, audioconfig_pitch)
 
         # Save the audio to a file
-        hash = hashlib.md5(audio_data.encode()).hexdigest()
+        hash = hashlib.md5(response.encode()).hexdigest()
         file_path = f"cache/{hash}.wav"
 
         # if audio file does not exist
         if not os.path.exists(file_path):
             with open(file_path, "wb") as file:
-                file.write(base64.b64decode(audio_data))
+                file.write(base64.b64decode(response))
 
         #
         return file_path
