@@ -68,10 +68,12 @@ class Voice(commands.Cog, name="voice"):
             # Disconnect if the bot is the only one in the channel
             if len(before.channel.members) == 1:
                 await before.channel.guild.voice_client.disconnect()
+                return
 
             # Disconnect if all members is bot
             if all(member.bot for member in before.channel.members):
                 await before.channel.guild.voice_client.disconnect()
+                return
 
 #
 async def setup(bot) -> None:
