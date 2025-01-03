@@ -179,70 +179,70 @@ class DatabaseManager:
         #
         return result_query[0]
 
-    def update_audioconfig_pitch(self, user_id: int, pitch: float) -> None:
+    def update_pitch(self, user_id: int, pitch: float) -> None:
 
         #
         try:
             self.client.d1.database.query(
                 database_id=self.database_id,
                 account_id=self.account_id,
-                sql="UPDATE users SET audioconfig_pitch = ? WHERE user_id = ?",
+                sql="UPDATE users SET pitch = ? WHERE user_id = ?",
                 params=[pitch, str(user_id)],
             )
         except Exception as e:
-            self.logger.error(f"Failed to update user audioconfig pitch: {e}")
+            self.logger.error(f"Failed to update pitch: {e}")
             return
 
         #
-        self.logger.info(f"Updated user audioconfig pitch {user_id}")
+        self.logger.info(f"Updated pitch: user {user_id}")
 
-    def update_audioconfig_speakingrate(self, user_id: int, speakingrate: float) -> None:
+    def update_speakingrate(self, user_id: int, speakingrate: float) -> None:
 
         #
         try:
             self.client.d1.database.query(
                 database_id=self.database_id,
                 account_id=self.account_id,
-                sql="UPDATE users SET audioconfig_speakingrate = ? WHERE user_id = ?",
+                sql="UPDATE users SET speakingrate = ? WHERE user_id = ?",
                 params=[speakingrate, str(user_id)],
             )
         except Exception as e:
-            self.logger.error(f"Failed to update user audioconfig speakingrate: {e}")
+            self.logger.error(f"Failed to update speakingrate: {e}")
             return
 
         #
-        self.logger.info(f"Updated user audioconfig speakingrate {user_id}")
+        self.logger.info(f"Updated speakingrate: user {user_id}")
 
-    def update_voice_languagecode(self, user_id: int, languagecode: str) -> None:
+    def update_language(self, user_id: int, language: str) -> None:
 
         #
         try:
             self.client.d1.database.query(
                 database_id=self.database_id,
                 account_id=self.account_id,
-                sql="UPDATE users SET voice_languagecode = ? WHERE user_id = ?",
-                params=[languagecode, str(user_id)],
+                sql="UPDATE users SET language = ? WHERE user_id = ?",
+                params=[language, str(user_id)],
             )
         except Exception as e:
-            self.logger.error(f"Failed to update user voice languagecode: {e}")
+            self.logger.error(f"Failed to update language: {e}")
             return
 
         #
-        self.logger.info(f"Updated user voice languagecode {user_id}")
+        self.logger.info(f"Updated language: user {user_id}")
 
-    def update_voice_name(self, user_id: int, name: str) -> None:
+    def update_voice(self, user_id: int, voice: str) -> None:
 
         #
         try:
             self.client.d1.database.query(
                 database_id=self.database_id,
                 account_id=self.account_id,
-                sql="UPDATE users SET voice_name = ? WHERE user_id = ?",
-                params=[name, str(user_id)],
+                sql="UPDATE users SET voice = ? WHERE user_id = ?",
+                params=[voice, str(user_id)],
             )
         except Exception as e:
-            self.logger.error(f"Failed to update user voice name: {e}")
+            self.logger.error(f"Failed to update voice: {e}")
             return
 
         #
-        self.logger.info(f"Updated user voice name {user_id}")
+        self.logger.info(f"Updated voice: user {user_id}")

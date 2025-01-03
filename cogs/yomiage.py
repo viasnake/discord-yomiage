@@ -54,19 +54,19 @@ class Yomiage(commands.Cog, name="yomiage"):
     async def synthesize(self, text: str) -> str:
 
         #
-        settings = await self.get_user(self.bot.user.id)
-        if settings is None:
+        user = await self.get_user(self.bot.user.id)
+        if user is None:
             self.bot.logger.error(f"Failed to get settings for user_id {self.bot.user.id}")
             return
 
         #
-        voice_languagecode = settings["voice_languagecode"]
-        voice_name = settings["voice_name"]
-        audioconfig_speakingrate = settings["audioconfig_speakingrate"]
-        audioconfig_pitch = settings["audioconfig_pitch"]
+        language = user["language"]
+        voice = user["voice"]
+        speakingrate = user["speakingrate"]
+        pitch = user["pitch"]
 
         # Request the audio
-        response = self.GoogleTTS.synthesize(text, voice_languagecode, voice_name, audioconfig_speakingrate, audioconfig_pitch)
+        response = self.GoogleTTS.synthesize(text, language, voice, speakingrate, pitch)
 
         # Save the audio to a file
         hash = hashlib.md5(response.encode()).hexdigest()

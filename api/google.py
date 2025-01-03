@@ -43,7 +43,7 @@ class GoogleTTS:
         return response.json()
 
     #
-    def synthesize(self, text: str, voice_language_code: str, voice_name: str, audioconfig_speakingrate: float, audioconfig_pitch: float) -> str:
+    def synthesize(self, text: str, language: str, voice: str, speakingrate: float, pitch: float) -> str:
 
         #
         API_ENDPOINT = f"{self.V1_API_ENDPOINT}/text:synthesize"
@@ -58,13 +58,13 @@ class GoogleTTS:
             'text': text
           },
           'voice': {
-            'languageCode': voice_language_code,
-            'name': voice_name,
+            'languageCode': language,
+            'name': voice,
           },
           'audioConfig': {
             'audioEncoding': 'LINEAR16',
-            'speakingRate': audioconfig_speakingrate,
-            'pitch': audioconfig_pitch,
+            'speakingRate': speakingrate,
+            'pitch': pitch
           }
         }
 

@@ -23,7 +23,7 @@ class Setting(commands.Cog, name="setting"):
             return
 
         # Update the user's audio configuration
-        self.bot.database.update_audioconfig_pitch(context.author.id, pitch)
+        self.bot.database.update_pitch(context.author.id, pitch)
         await context.send(f"ピッチを {pitch} に設定しました。")
 
     #
@@ -39,7 +39,7 @@ class Setting(commands.Cog, name="setting"):
             return
 
         # Update the user's audio configuration
-        self.bot.database.update_audioconfig_speakingrate(context.author.id, speed)
+        self.bot.database.update_speakingrate(context.author.id, speed)
         await context.send(f"速度を {speed} に設定しました。")
 
     #
@@ -62,7 +62,7 @@ class Setting(commands.Cog, name="setting"):
             return
 
         # Update the user's audio configuration
-        self.bot.database.update_voice_languagecode(context.author.id, language)
+        self.bot.database.update_language(context.author.id, language)
         await context.send(f"言語を {language} に設定しました。")
 
     #
@@ -73,14 +73,14 @@ class Setting(commands.Cog, name="setting"):
     async def set_voice(self, context: Context, voice: str) -> None:
 
         # Check if the voice is valid
-        language = self.bot.database.get_user_by_user_id(context.author.id)["voice_languagecode"]
+        language = self.bot.database.get_user_by_user_id(context.author.id)["voice"]
         voices = await self.get_voice(language)
         if voice not in [voice["name"] for voice in voices]:
             await context.send("無効な音声です。利用可能な音声: " + ", ".join([voice["name"] for voice in voices]))
             return
 
         # Update the user's audio configuration
-        self.bot.database.update_voice_name(context.author.id, voice)
+        self.bot.database.update_voice(context.author.id, voice)
         await context.send(f"音声を {voice} に設定しました.")
 
     async def get_voice(self, language_code: str) -> list:
