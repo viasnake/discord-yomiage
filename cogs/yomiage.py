@@ -47,7 +47,7 @@ class Yomiage(commands.Cog, name="yomiage"):
             await asyncio.sleep(1)
 
         # Play the audio
-        context.guild.voice_client.play(discord.FFmpegPCMAudio(file_path))
+        context.guild.voice_client.play(discord.FFmpegPCMAudio(file_path, before_options="-channel_layout mono"))
 
     #
     async def synthesize(self, text: str) -> str:
