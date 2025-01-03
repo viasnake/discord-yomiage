@@ -132,4 +132,4 @@ class Discord(Bot):
 config = ConfigLoader()
 
 #
-Discord().run(config.get("token"))
+Discord().run(config.get("discord_token"))
