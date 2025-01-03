@@ -94,7 +94,7 @@ class Discord(Bot):
     async def on_command_error(self, context: Context, exception: Exception) -> None:
 
         # Log the exception
-        self.logger.error(f"Ignoring exception in command {context.command}:", exc_info=exception)
+        self.logger.error(f"An exception occurred: {exception}")
 
     #
     async def on_message(self, message: discord.Message) -> None:
