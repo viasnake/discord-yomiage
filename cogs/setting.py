@@ -1,3 +1,4 @@
+import api
 import re
 from discord.ext import commands
 from discord.ext.commands import Context
@@ -22,7 +23,7 @@ class Setting(commands.Cog, name="setting"):
             return
 
         # Update the user's audio configuration
-        await self.bot.database.update_user_audioconfig_pitch(context.author.id, pitch)
+        self.bot.database.update_audioconfig_pitch(context.author.id, pitch)
         await context.send(f"ピッチを {pitch} に設定しました。")
 
     #
@@ -38,7 +39,7 @@ class Setting(commands.Cog, name="setting"):
             return
 
         # Update the user's audio configuration
-        await self.bot.database.update_user_audioconfig_speakingrate(context.author.id, speed)
+        self.bot.database.update_audioconfig_speakingrate(context.author.id, speed)
         await context.send(f"速度を {speed} に設定しました。")
 
     #
@@ -53,8 +54,15 @@ class Setting(commands.Cog, name="setting"):
             await context.send("言語は BCP-47 形式で指定してください。")
             return
 
+        # Check if the language is valid
+        voices = await self.get_voice(language)
+        print(voices, len(voices))
+        if len(voices) == 0:
+            await context.send("無効な言語です。")
+            return
+
         # Update the user's audio configuration
-        await self.bot.database.update_user_audioconfig_languagecode(context.author.id, language)
+        self.bot.database.update_voice_languagecode(context.author.id, language)
         await context.send(f"言語を {language} に設定しました。")
 
     #
@@ -64,14 +72,21 @@ class Setting(commands.Cog, name="setting"):
     )
     async def set_voice(self, context: Context, voice: str) -> None:
 
-        # FIXME: NEEDS MORE ITELIGENCE HERE
-        if voice not in ["ja-JP-Wavenet-A", "ja-JP-Wavenet-B", "ja-JP-Wavenet-C", "ja-JP-Wavenet-D"]:
-            await context.send("音声は ja-JP-Wavenet-A, ja-JP-Wavenet-B, ja-JP-Wavenet-C, ja-JP-Wavenet-D のいずれかを指定してください。")
+        # Check if the voice is valid
+        language = self.bot.database.get_user_by_user_id(context.author.id)["voice_languagecode"]
+        voices = await self.get_voice(language)
+        if voice not in [voice["name"] for voice in voices]:
+            await context.send("無効な音声です。利用可能な音声: " + ", ".join([voice["name"] for voice in voices]))
             return
 
         # Update the user's audio configuration
-        await self.bot.database.update_user_audioconfig_voice(context.author.id, voice)
+        self.bot.database.update_voice_name(context.author.id, voice)
         await context.send(f"音声を {voice} に設定しました.")
+
+    async def get_voice(self, language_code: str) -> list:
+
+        # Get the voices for the specified language
+        return api.GoogleTTS().voices(language_code).get("voices")
 
 #
 async def setup(bot) -> None:

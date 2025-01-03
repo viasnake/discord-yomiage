@@ -13,6 +13,7 @@ class Yomiage(commands.Cog, name="yomiage"):
     #
     def __init__(self, bot):
         self.bot = bot
+        self.GoogleTTS = api.GoogleTTS()
 
     #
     @commands.Cog.listener("on_message")
@@ -65,7 +66,7 @@ class Yomiage(commands.Cog, name="yomiage"):
         audioconfig_pitch = settings["audioconfig_pitch"]
 
         # Request the audio
-        response = api.synthesize(text, voice_languagecode, voice_name, audioconfig_speakingrate, audioconfig_pitch)
+        response = self.GoogleTTS.synthesize(text, voice_languagecode, voice_name, audioconfig_speakingrate, audioconfig_pitch)
 
         # Save the audio to a file
         hash = hashlib.md5(response.encode()).hexdigest()

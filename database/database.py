@@ -179,7 +179,7 @@ class DatabaseManager:
         #
         return result_query[0]
 
-    def update_user_audioconfig_pitch(self, user_id: int, pitch: float) -> None:
+    def update_audioconfig_pitch(self, user_id: int, pitch: float) -> None:
 
         #
         try:
@@ -196,7 +196,7 @@ class DatabaseManager:
         #
         self.logger.info(f"Updated user audioconfig pitch {user_id}")
 
-    def update_user_audioconfig_speakingrate(self, user_id: int, speakingrate: float) -> None:
+    def update_audioconfig_speakingrate(self, user_id: int, speakingrate: float) -> None:
 
         #
         try:
