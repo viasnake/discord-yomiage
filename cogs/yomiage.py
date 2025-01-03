@@ -2,7 +2,7 @@ import asyncio
 import base64
 import hashlib
 import requests
-
+import os
 import discord
 from discord.ext import commands
 from discord.ext.commands import Context
@@ -89,8 +89,11 @@ class Yomiage(commands.Cog, name="yomiage"):
         # Save the audio to a file
         hash = hashlib.md5(audio_data.encode()).hexdigest()
         file_path = f"cache/{hash}.wav"
-        with open(file_path, "wb") as file:
-            file.write(base64.b64decode(audio_data))
+
+        # if audio file does not exist
+        if not os.path.exists(file_path):
+            with open(file_path, "wb") as file:
+                file.write(base64.b64decode(audio_data))
 
         #
         return file_path
