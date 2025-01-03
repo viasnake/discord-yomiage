@@ -15,7 +15,7 @@ class Setting(commands.Cog, name="setting"):
         name="setpitch",
         description="音声のピッチを設定する。",
     )
-    async def set_pitch(self, context: Context, pitch: float) -> None:
+    async def set_pitch(self, context: Context, pitch: str) -> None:
 
         # Check if the pitch is within the valid range
         if pitch < -20 or pitch > 20:
@@ -32,6 +32,9 @@ class Setting(commands.Cog, name="setting"):
         description="音声の速度を設定する。",
     )
     async def set_speaking_rate(self, context: Context, speed: float) -> None:
+
+        # Convert the speed to a float
+        speed = float(speed)
 
         # Check if the speed is within the valid range
         if speed < 0.25 or speed > 4.0:
@@ -56,7 +59,6 @@ class Setting(commands.Cog, name="setting"):
 
         # Check if the language is valid
         voices = await self.get_voice(language)
-        print(voices, len(voices))
         if len(voices) == 0:
             await context.send("無効な言語です。")
             return
@@ -83,6 +85,18 @@ class Setting(commands.Cog, name="setting"):
         self.bot.database.update_voice(context.author.id, voice)
         await context.send(f"音声を {voice} に設定しました.")
 
+    #
+    @commands.hybrid_command(
+        name="settargetchannel",
+        description="読み上げするチャンネルを設定する。",
+    )
+    async def set_target_channel(self, context: Context) -> None:
+
+        # Update the user's audio configuration
+        self.bot.database.update_target_channel(context.guild.id, context.channel.id)
+        await context.send(f"読み上げ対象のチャンネルを {context.channel.name} に設定しました。 {context.channel.id}")
+
+    #
     async def get_voice(self, language_code: str) -> list:
 
         # Get the voices for the specified language

@@ -44,7 +44,7 @@ class DatabaseManager:
             self.logger.error(f"Failed to initialize the database: {e}")
 
     #
-    def add_guild(self, guild_id: int) -> None:
+    def add_guild(self, guild_id: str) -> None:
 
         #
         try:
@@ -62,7 +62,7 @@ class DatabaseManager:
         self.logger.info(f"Added guild {guild_id}")
 
     #
-    def delete_guild(self, guild_id: int) -> None:
+    def delete_guild(self, guild_id: str) -> None:
 
         #
         try:
@@ -80,7 +80,7 @@ class DatabaseManager:
         self.logger.info(f"Deleted guild {guild_id}")
 
     #
-    def get_guild_by_guild_id(self, guild_id: int) -> dict | None:
+    def get_guild_by_guild_id(self, guild_id: str) -> dict | None:
 
         #
         try:
@@ -112,7 +112,7 @@ class DatabaseManager:
         return result_query[0]
 
     #
-    def add_user(self, user_id: int) -> None:
+    def add_user(self, user_id: str) -> None:
 
         #
         try:
@@ -130,7 +130,7 @@ class DatabaseManager:
         self.logger.info(f"Added user {user_id}")
 
     #
-    def delete_user(self, user_id: int) -> None:
+    def delete_user(self, user_id: str) -> None:
 
         #
         try:
@@ -148,14 +148,14 @@ class DatabaseManager:
         self.logger.info(f"Deleted user {user_id}")
 
     #
-    def get_user_by_user_id(self, user_id: int) -> dict | None:
+    def get_user_by_user_id(self, user_id: str) -> dict | None:
 
         #
         try:
             result = self.client.d1.database.query(
                 database_id=self.database_id,
                 account_id=self.account_id,
-                sql=f"SELECT * FROM users WHERE user_id = ?",
+                sql="SELECT * FROM users WHERE user_id = ?",
                 params=[str(user_id)],
             )
             result_query = result[0].results
@@ -179,7 +179,7 @@ class DatabaseManager:
         #
         return result_query[0]
 
-    def update_pitch(self, user_id: int, pitch: float) -> None:
+    def update_pitch(self, user_id: str, pitch: float) -> None:
 
         #
         try:
@@ -187,7 +187,7 @@ class DatabaseManager:
                 database_id=self.database_id,
                 account_id=self.account_id,
                 sql="UPDATE users SET pitch = ? WHERE user_id = ?",
-                params=[pitch, str(user_id)],
+                params=[str(pitch), str(user_id)],
             )
         except Exception as e:
             self.logger.error(f"Failed to update pitch: {e}")
@@ -196,7 +196,7 @@ class DatabaseManager:
         #
         self.logger.info(f"Updated pitch: user {user_id}")
 
-    def update_speakingrate(self, user_id: int, speakingrate: float) -> None:
+    def update_speakingrate(self, user_id: str, speakingrate: str) -> None:
 
         #
         try:
@@ -204,7 +204,7 @@ class DatabaseManager:
                 database_id=self.database_id,
                 account_id=self.account_id,
                 sql="UPDATE users SET speakingrate = ? WHERE user_id = ?",
-                params=[speakingrate, str(user_id)],
+                params=[str(speakingrate), str(user_id)],
             )
         except Exception as e:
             self.logger.error(f"Failed to update speakingrate: {e}")
@@ -213,7 +213,7 @@ class DatabaseManager:
         #
         self.logger.info(f"Updated speakingrate: user {user_id}")
 
-    def update_language(self, user_id: int, language: str) -> None:
+    def update_language(self, user_id: str, language: str) -> None:
 
         #
         try:
@@ -221,7 +221,7 @@ class DatabaseManager:
                 database_id=self.database_id,
                 account_id=self.account_id,
                 sql="UPDATE users SET language = ? WHERE user_id = ?",
-                params=[language, str(user_id)],
+                params=[str(language), str(user_id)],
             )
         except Exception as e:
             self.logger.error(f"Failed to update language: {e}")
@@ -230,7 +230,7 @@ class DatabaseManager:
         #
         self.logger.info(f"Updated language: user {user_id}")
 
-    def update_voice(self, user_id: int, voice: str) -> None:
+    def update_voice(self, user_id: str, voice: str) -> None:
 
         #
         try:
@@ -238,7 +238,7 @@ class DatabaseManager:
                 database_id=self.database_id,
                 account_id=self.account_id,
                 sql="UPDATE users SET voice = ? WHERE user_id = ?",
-                params=[voice, str(user_id)],
+                params=[str(voice), str(user_id)],
             )
         except Exception as e:
             self.logger.error(f"Failed to update voice: {e}")
@@ -246,3 +246,20 @@ class DatabaseManager:
 
         #
         self.logger.info(f"Updated voice: user {user_id}")
+
+    def update_target_channel(self, guild_id: str, channel_id: str) -> None:
+
+            #
+            try:
+                result = self.client.d1.database.query(
+                    database_id=self.database_id,
+                    account_id=self.account_id,
+                    sql="UPDATE guilds SET target_channel_id = ? WHERE guild_id = ?",
+                    params=[str(channel_id), str(guild_id)],
+                )
+            except Exception as e:
+                self.logger.error(f"Failed to update target_channel_id: {e}")
+                return
+
+            #
+            self.logger.info(f"Updated target_channel_id: guild {guild_id}, channel {channel_id}")
