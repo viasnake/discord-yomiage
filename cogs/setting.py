@@ -153,14 +153,18 @@ class Setting(commands.Cog, name="setting"):
             await context.send("スコープは global または local で指定してください。")
             return
 
+        #
+        if not context.guild:
+            return
+
         # Set the target channel to global
         if scope == "global":
-            self.database.update_target_channel(str(context.author.id), "0")
+            self.database.update_target_channel(str(context.guild.id), "0")
             await context.send("読み上げ対象のチャンネルを全チャンネルに設定しました。")
             return
 
         # Set the target channel to local
-        self.database.update_target_channel(str(context.author.id), str(context.channel.id))
+        self.database.update_target_channel(str(context.guild.id), str(context.channel.id))
         await context.send(f"読み上げ対象のチャンネルをこのチャンネルに設定しました。")
 
     #
