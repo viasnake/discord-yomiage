@@ -23,9 +23,10 @@ class Logger:
         )
         file_handler.setFormatter(file_handler_formatter)
 
-        # Add the handlers
-        self.logger.addHandler(console_handler)
-        self.logger.addHandler(file_handler)
+        #
+        if not self.logger.handlers:
+            self.logger.addHandler(console_handler)
+            self.logger.addHandler(file_handler)
 
     #
     def debug(self, message: str) -> None:
