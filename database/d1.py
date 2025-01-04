@@ -98,13 +98,8 @@ class D1:
                 return
 
             #
-            if not result:
-                self.logger.error(f"Failed to get target_channel_id: result {result}")
-                return
-
-            #
-            if not result[0].results:
-                self.logger.error(f"Failed to get target_channel_id: result[0].results {result[0].results}")
+            if result[0].results is None:
+                self.logger.error(f"Failed to get target_channel_id: {result[0].results}")
                 return
 
             #
@@ -174,13 +169,8 @@ class D1:
             return
 
         #
-        if not result:
-            self.logger.error(f"Failed to get user")
-            return
-
-        #
-        if not result[0].results:
-            self.logger.error(f"Failed to get user")
+        if result[0].results is None:
+            self.logger.error(f"Failed to get target_channel_id: {result[0].results}")
             return
 
         #
