@@ -146,7 +146,7 @@ class Setting(commands.Cog, name="setting"):
         name="setchannel",
         description="読み上げるチャンネルを設定する。",
     )
-    async def set_target_channel(self, context: Context, scope: str = "global") -> None:
+    async def set_target_channel(self, context: Context, scope: str = "local") -> None:
 
         # Check if the scope is valid
         if scope not in ["global", "local"]:
