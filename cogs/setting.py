@@ -92,12 +92,23 @@ class Setting(commands.Cog, name="setting"):
 
     #
     @commands.hybrid_command(
-        name="settargetchannel",
-        description="読み上げするチャンネルを設定する。",
+        name="setchannel",
+        description="読み上げるチャンネルを設定する。",
     )
-    async def set_target_channel(self, context: Context) -> None:
+    async def set_target_channel(self, context: Context, scope: str = "global") -> None:
 
-        # Update the user's audio configuration
+        # Check if the scope is valid
+        if scope not in ["global", "local"]:
+            await context.send("スコープは global または local で指定してください。")
+            return
+
+        # Set the target channel to global
+        if scope == "global":
+            self.database.update_target_channel(str(context.author.id), "0")
+            await context.send("読み上げ対象のチャンネルを全チャンネルに設定しました。")
+            return
+
+        # Set the target channel to local
         self.database.update_target_channel(str(context.author.id), str(context.channel.id))
         await context.send(f"読み上げ対象のチャンネルをこのチャンネルに設定しました。")
 
