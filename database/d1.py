@@ -17,8 +17,7 @@ class D1:
 
         #
         self.client = Cloudflare(
-            api_email=config.get("cloudflare_api_email"),
-            api_key=config.get("cloudflare_api_key"),
+            api_token=config.get("cloudflare_api_token"),
         )
         self.database_id: str = config.get("cloudflare_database_id")
         self.account_id: str = config.get("cloudflare_account_id")
