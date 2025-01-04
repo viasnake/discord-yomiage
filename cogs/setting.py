@@ -12,8 +12,8 @@ from logger import Logger
 class Dropdown(discord.ui.Select):
 
         #
-        def __init__(self, options: list[SelectOption], database: D1, id: str, placeholder: str = "選択してください。") -> None:
-            super().__init__(placeholder=placeholder, min_values=1, max_values=1, options=options, custom_id=id)
+        def __init__(self, options: list[SelectOption], database: D1, custom_id: str, placeholder: str = "選択してください。") -> None:
+            super().__init__(placeholder=placeholder, min_values=1, max_values=1, options=options, custom_id=custom_id)
             self.database = database
 
         #
@@ -104,7 +104,7 @@ class Setting(commands.Cog, name="setting"):
 
         # Create the dropdown
         options = [SelectOption(label=f"{language['name']}", description=language['name'], emoji=language['flag']) for language in languages.values()]
-        dropdown = Dropdown(options, self.database, str(context.author.id), "言語を選択してください。")
+        dropdown = Dropdown(options, self.database, "language", "言語を選択してください。")
         view = DropdownView(dropdown)
 
         # Send the message
@@ -135,7 +135,7 @@ class Setting(commands.Cog, name="setting"):
 
         # Create the dropdown
         options = [SelectOption(label=voice["name"], description=voice["name"]) for voice in voices]
-        dropdown = Dropdown(options, self.database, str(context.author.id), "音声を選択してください。")
+        dropdown = Dropdown(options, self.database, "voice", "音声を選択してください。")
         view = DropdownView(dropdown)
 
         # Send the message
