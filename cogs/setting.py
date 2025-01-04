@@ -65,7 +65,7 @@ class Setting(commands.Cog, name="setting"):
     async def set_pitch(self, context: Context, pitch: str) -> None:
 
         # Check if the pitch is within the valid range
-        if not pitch.isdigit() or int(pitch) < -20 or int(pitch) > 20:
+        if int(pitch) < -20 or int(pitch) > 20:
             await context.send("ピッチは -20 から 20 の間で指定してください。")
             return
 
