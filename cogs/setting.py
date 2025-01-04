@@ -103,7 +103,7 @@ class Setting(commands.Cog, name="setting"):
         languages = await self.get_available_languages()
 
         # Create the dropdown
-        options = [SelectOption(label=f"{language['name']}", description=language['name'], emoji=language['flag']) for language in languages.values()]
+        options = [SelectOption(label=f"{language['code']}", description=language['name'], emoji=language['flag']) for language in languages.values()]
         dropdown = Dropdown(options, self.database, "language", "言語を選択してください。")
         view = DropdownView(dropdown)
 
