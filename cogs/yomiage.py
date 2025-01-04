@@ -56,7 +56,7 @@ class Yomiage(commands.Cog, name="yomiage"):
                 return
 
         # Synthesize the audio
-        file_path = await self.synthesize(context.content)
+        file_path = await self.synthesize(context.content, context.author.id)
         if not file_path:
             return
 
@@ -74,16 +74,16 @@ class Yomiage(commands.Cog, name="yomiage"):
             voice_client.play(discord.FFmpegPCMAudio(file_path, before_options="-channel_layout mono"))
 
     #
-    async def synthesize(self, text: str) -> str | None:
+    async def synthesize(self, text: str, user_id: int) -> str | None:
 
         #
         if self.bot.user is None:
             self.logger.error("Bot user is None")
             return None
 
-        user = await self.get_user(self.bot.user.id)
+        user = await self.get_user(user_id)
         if user is None:
-            self.logger.error(f"Failed to get user settings for user_id {self.bot.user.id}")
+            self.logger.error(f"Failed to get user settings for user_id {user_id}")
             return None
 
         #
