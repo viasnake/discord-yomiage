@@ -9,7 +9,7 @@ class ConfigLoader:
         self.config = self.load_config()
 
     #
-    def load_config(self) -> dict:
+    def load_config(self) -> dict[str, str]:
 
         #
         if not os.path.isfile(f"{os.path.realpath(os.path.dirname(__file__))}/config.json"):
@@ -21,4 +21,4 @@ class ConfigLoader:
 
     #
     def get(self, key: str) -> str:
-        return self.config.get(key, None)
+        return self.config.get(key, "")

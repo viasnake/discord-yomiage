@@ -1,26 +1,30 @@
 import os
 import sys
+from typing import List, Any
 from cloudflare import Cloudflare
+from cloudflare.types.d1 import QueryResult
 from config import ConfigLoader
 from logger import Logger
 
 #
-class DatabaseManager:
+class D1:
 
     #
-    def __init__(self, client: Cloudflare) -> None:
+    def __init__(self) -> None:
 
         #
         config = ConfigLoader()
 
         #
-        self.client = client
-        self.database_id = config.get("cloudflare_database_id")
-        self.account_id = config.get("cloudflare_account_id")
-        self.logger = Logger("DatabaseManager")
+        self.client = Cloudflare(
+            api_email=config.get("cloudflare_api_email"),
+            api_key=config.get("cloudflare_api_key"),
+        )
+        self.database_id: str = config.get("cloudflare_database_id")
+        self.account_id: str = config.get("cloudflare_account_id")
 
         #
-        self.init_database()
+        self.logger = Logger("CloudflareD1")
 
     #
     def init_database(self) -> None:
@@ -31,7 +35,7 @@ class DatabaseManager:
 
         #
         with open(f"{os.path.realpath(os.path.dirname(__file__))}/schema.sql", "r") as file:
-            schema = file.read()
+            schema: str = file.read()
 
         #
         try:
@@ -80,36 +84,44 @@ class DatabaseManager:
         self.logger.info(f"Deleted guild {guild_id}")
 
     #
-    def get_guild_by_guild_id(self, guild_id: str) -> dict | None:
+    def get_target_channel_id(self, guild_id: str) -> str | None:
 
-        #
-        try:
-            result = self.client.d1.database.query(
-                database_id=self.database_id,
-                account_id=self.account_id,
-                sql="SELECT * FROM guilds WHERE guild_id = ?",
-                params=[str(guild_id)],
-            )
-            result_query = result[0].results
-        except Exception as e:
-            self.logger.error(f"Failed to get guild: {e}")
-            return
+            #
+            try:
+                result: List[QueryResult] = self.client.d1.database.query(
+                    database_id=self.database_id,
+                    account_id=self.account_id,
+                    sql="SELECT * FROM guilds WHERE guild_id = ?",
+                    params=[str(guild_id)],
+                )
+            except Exception as e:
+                self.logger.error(f"Failed to get target_channel_id: {e}")
+                return
 
-        #
-        if len(result_query) == 0:
-            self.logger.error(f"No rows found for guild_id {guild_id}")
-            self.add_guild(guild_id)
-            return self.get_guild_by_guild_id(guild_id)
+            #
+            if not result:
+                self.logger.error(f"Failed to get target_channel_id: {result}")
+                return
 
-        #
-        if len(result_query) > 1:
-            self.logger.error(f"Multiple rows found for guild_id {guild_id}")
-            self.delete_guild(guild_id)
-            self.add_guild(guild_id)
-            return self.get_guild_by_guild_id(guild_id)
+            #
+            if not result[0].results:
+                self.logger.error(f"Failed to get target_channel_id: {result[0].results}")
+                return
 
-        #
-        return result_query[0]
+            #
+            if len(result[0].results) == 0:
+                self.logger.error(f"No rows found for guild_id {guild_id}")
+                self.add_guild(guild_id)
+                return self.get_target_channel_id(guild_id)
+
+            #
+            if len(result[0].results) > 1:
+                self.logger.error(f"Multiple rows found for guild_id {guild_id}")
+                self.delete_guild(guild_id)
+                self.add_guild(guild_id)
+                return self.get_target_channel_id(guild_id)
+
+            return result[0].results[0]["target_channel_id"] # type: ignore
 
     #
     def add_user(self, user_id: str) -> None:
@@ -148,38 +160,51 @@ class DatabaseManager:
         self.logger.info(f"Deleted user {user_id}")
 
     #
-    def get_user_by_user_id(self, user_id: str) -> dict | None:
+    def get_user_settings(self, user_id: str) -> dict[str, str] | None:
 
         #
         try:
-            result = self.client.d1.database.query(
+            result: List[QueryResult] = self.client.d1.database.query(
                 database_id=self.database_id,
                 account_id=self.account_id,
                 sql="SELECT * FROM users WHERE user_id = ?",
                 params=[str(user_id)],
             )
-            result_query = result[0].results
         except Exception as e:
             self.logger.error(f"Failed to get user: {e}")
             return
 
         #
-        if len(result_query) == 0:
-            self.logger.error(f"No rows found for user_id {user_id}")
-            self.add_user(user_id)
-            return self.get_user_by_user_id(user_id)
+        if not result:
+            self.logger.error(f"Failed to get user")
+            return
 
         #
-        if len(result_query) > 1:
+        if not result[0].results:
+            self.logger.error(f"Failed to get user")
+            return
+
+        #
+        if len(result[0].results) == 0:
+            self.logger.error(f"No rows found for user_id {user_id}")
+            self.add_user(user_id)
+            return self.get_user_settings(user_id)
+
+        #
+        if len(result[0].results) > 1:
             self.logger.error(f"Multiple rows found for user_id {user_id}")
             self.delete_user(user_id)
             self.add_user(user_id)
-            return self.get_user_by_user_id(user_id)
+            return self.get_user_settings(user_id)
 
-        #
-        return result_query[0]
+        return {
+            "language": result[0].results[0]["language"], # type: ignore
+            "pitch": result[0].results[0]["pitch"], # type: ignore
+            "speakingrate": result[0].results[0]["speakingrate"], # type: ignore
+            "voice": result[0].results[0]["voice"], # type: ignore
+        }
 
-    def update_pitch(self, user_id: str, pitch: float) -> None:
+    def update_pitch(self, user_id: str, pitch: str) -> None:
 
         #
         try:
@@ -251,7 +276,7 @@ class DatabaseManager:
 
             #
             try:
-                result = self.client.d1.database.query(
+                self.client.d1.database.query(
                     database_id=self.database_id,
                     account_id=self.account_id,
                     sql="UPDATE guilds SET target_channel_id = ? WHERE guild_id = ?",

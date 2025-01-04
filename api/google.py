@@ -12,21 +12,21 @@ class GoogleTTS:
         config = ConfigLoader()
 
         #
-        self.V1_API_ENDPOINT = "https://texttospeech.googleapis.com/v1"
+        self.V1_API_ENDPOINT: str = "https://texttospeech.googleapis.com/v1"
 
         #
-        self.api_key = config.get("google_api_key")
+        self.api_key: str = config.get("google_api_key")
         self.logger = Logger("GoogleTTS")
 
     #
-    def voices(self, language_code: str) -> dict:
+    async def voices(self, language_code: str) -> list[dict[str, str]]:
 
         #
-        QUERY = f"?languageCode={language_code}"
-        API_ENDPOINT = f"{self.V1_API_ENDPOINT}/voices{QUERY}"
+        QUERY: str = f"?languageCode={language_code}"
+        API_ENDPOINT: str = f"{self.V1_API_ENDPOINT}/voices{QUERY}"
 
         #
-        headers = {
+        headers: dict[str, str] = {
           'X-Goog-Api-Key': self.api_key,
           'Content-Type': 'application/json; charset=utf-8'
         }
@@ -40,26 +40,26 @@ class GoogleTTS:
             raise Exception(f"Failed to get voices: {response.text}")
 
         #
-        return response.json()
+        return response.json().get("voices", [])
 
     #
-    def synthesize(self, text: str, language: str, voice: str, speakingrate: float, pitch: float) -> str:
+    async def synthesize(self, text: str, language: str, voice: str, speakingrate: str, pitch: str) -> str:
 
         #
-        API_ENDPOINT = f"{self.V1_API_ENDPOINT}/text:synthesize"
+        API_ENDPOINT: str = f"{self.V1_API_ENDPOINT}/text:synthesize"
 
         #
-        headers = {
+        headers: dict[str, str] = {
           'X-Goog-Api-Key': self.api_key,
           'Content-Type': 'application/json; charset=utf-8'
         }
-        body = {
+        body: dict[str, dict[str, str]] = {
           'input': {
-            'text': text
+            'text': text,
           },
           'voice': {
             'languageCode': language,
-            'name': voice,
+            'name': voice
           },
           'audioConfig': {
             'audioEncoding': 'LINEAR16',
@@ -69,7 +69,7 @@ class GoogleTTS:
         }
 
         #
-        response = requests.post(API_ENDPOINT, headers=headers, json=body)
+        response: requests.Response = requests.post(API_ENDPOINT, headers=headers, json=body)
         response.raise_for_status()
 
         #

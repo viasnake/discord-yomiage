@@ -3,13 +3,12 @@ import platform
 import random
 
 from config import ConfigLoader
-from database import DatabaseManager
+from database import D1
 from logger import Logger
-from cloudflare import Cloudflare
 
 import discord
 from discord.ext import tasks
-from discord.ext.commands import Bot, Context
+from discord.ext.commands import Bot, Context # type: ignore
 
 
 #
@@ -27,11 +26,7 @@ class Discord(Bot):
         self.config = ConfigLoader()
 
         #
-        client = Cloudflare(
-            api_email=self.config.get("cloudflare_api_email"),
-            api_key=self.config.get("cloudflare_api_key"),
-        )
-        self.database = DatabaseManager(client)
+        self.database = D1()
 
         #
         super().__init__(
@@ -42,16 +37,16 @@ class Discord(Bot):
     #
     async def setup_hook(self) -> None:
 
-        # Log the bot information
-        self.logger.info(f"Logged in as {self.user.name}")
+        #
+        if self.user is not None:
+            self.logger.info(f"Logged in as {self.user.name}")
         self.logger.info(f"discord.py API version: {discord.__version__}")
         self.logger.info(f"Python version: {platform.python_version()}")
         self.logger.info(f"Running on: {platform.system()} {platform.release()} ({os.name})")
 
         #
+        self.database.init_database()
         await self.load_cogs()
-
-        # Start the status task
         self.status_task.start()
 
     #
@@ -74,26 +69,25 @@ class Discord(Bot):
     async def on_command_completion(self, context: Context) -> None:
 
         # Get the executed command
-        full_command_name = context.command.qualified_name
-        split = full_command_name.split(" ")
-        executed_command = str(split[0])
+        if context.command is not None:
+            full_command_name: str = context.command.qualified_name
+            split: list[str] = full_command_name.split(" ")
+            executed_command: str = split[0]
+        else:
+            executed_command: str = "Unknown"
 
         # Log the command in a guild
         if context.guild is not None:
-            self.logger.info(
-                f"Executed {executed_command} command in {context.guild.name} (ID: {context.guild.id}) by {context.author} (ID: {context.author.id})"
-            )
+            self.logger.info(f"Executed {executed_command} command in {context.guild.name} (ID: {context.guild.id}) by {context.author} (ID: {context.author.id})")
 
         # Log the command in DMs
         else:
-            self.logger.info(
-                f"Executed {executed_command} command by {context.author} (ID: {context.author.id}) in DMs"
-            )
+            self.logger.info(f"Executed {executed_command} command by {context.author} (ID: {context.author.id}) in DMs")
 
     #
-    async def on_command_error(self, context: Context, exception: Exception) -> None:
+    async def on_command_error(self, context: Context[Bot], exception: Exception) -> None:
 
-        # Log the exception
+        #
         self.logger.error(f"An exception occurred: {exception}")
 
     #
@@ -104,7 +98,7 @@ class Discord(Bot):
             return
 
         # Ignore messages sent by self
-        if message.author.id == self.user.id:
+        if self.user is not None and message.author.id == self.user.id:
             return
 
         # Process the commands
@@ -114,18 +108,15 @@ class Discord(Bot):
     @tasks.loop(seconds=60)
     async def status_task(self) -> None:
 
-        # Set the status
-        await self.change_presence(
-            activity=discord.Game(
-                name=random.choice(self.config.get("status"))
-            )
-        )
+        #
+        status: str = random.choice(self.config.get("status"))
+        await self.change_presence(activity=discord.Game(name=status))
 
     #
     @status_task.before_loop
     async def before_status_task(self) -> None:
 
-        # Wait until the bot is ready
+        #
         await self.wait_until_ready()
 
 #

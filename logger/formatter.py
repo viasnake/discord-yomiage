@@ -26,7 +26,7 @@ class Formatter(logging.Formatter):
     }
 
     #
-    def format(self, record):
+    def format(self, record) -> str:
         log_color = self.COLORS[record.levelno]
         format = "(black){asctime}(reset) (levelcolor){levelname:<8}(reset) (green){name}(reset) {message}"
         format = format.replace("(black)", self.black + self.bold)
