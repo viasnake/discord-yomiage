@@ -99,12 +99,12 @@ class D1:
 
             #
             if not result:
-                self.logger.error(f"Failed to get target_channel_id: {result}")
+                self.logger.error(f"Failed to get target_channel_id: result {result}")
                 return
 
             #
             if not result[0].results:
-                self.logger.error(f"Failed to get target_channel_id: {result[0].results}")
+                self.logger.error(f"Failed to get target_channel_id: result[0].results {result[0].results}")
                 return
 
             #
