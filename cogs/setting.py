@@ -1,9 +1,52 @@
 import re
 from api import GoogleTTS
 from database import D1
+import discord
 from discord.ext import commands
+from discord import SelectOption
 from discord.ext.commands import Bot, Context # type: ignore
 from logger import Logger
+
+
+#
+class Dropdown(discord.ui.Select):
+
+        #
+        def __init__(self, options: list[SelectOption], database: D1, id: str, placeholder: str = "選択してください。") -> None:
+            super().__init__(placeholder=placeholder, min_values=1, max_values=1, options=options, custom_id=id)
+            self.database = database
+
+        #
+        async def callback(self, interaction: discord.Interaction) -> None:
+            await interaction.response.defer()
+            value = self.values[0]
+
+            # Determine the update function based on the dropdown ID
+            if self.custom_id == "voice":
+                self.database.update_voice(str(interaction.user.id), value)
+            elif self.custom_id == "language":
+                self.database.update_language(str(interaction.user.id), value)
+
+            await interaction.followup.send(f"{value} に設定しました。", ephemeral=True)
+
+            #
+            if interaction.message:
+                await interaction.message.delete()
+
+#
+class DropdownView(discord.ui.View):
+
+        #
+        def __init__(self, dropdown: Dropdown) -> None:
+            super().__init__()
+            self.timeout = 60
+            self.add_item(dropdown)
+
+        #
+        async def on_timeout(self) -> None:
+
+            # Delete the dropdown
+            self.stop()
 
 #
 class Setting(commands.Cog, name="setting"):
@@ -51,44 +94,52 @@ class Setting(commands.Cog, name="setting"):
         name="setlanguage",
         description="音声の言語を設定する。",
     )
-    async def set_language(self, context: Context, language: str) -> None:
+    async def set_language(self, context: Context) -> None:
 
-        # Check if the language is in BCP-47 format
-        if not re.match(r"^[a-z]{2}-[A-Z]{2}$", language):
-            await context.send("言語は BCP-47 形式で指定してください。")
-            return
+        # Defer the response
+        await context.defer()
 
-        # Check if the language is valid
-        voices = await self.get_voice(language)
-        if len(voices) == 0:
-            await context.send("無効な言語です。")
-            return
+        # Get the available languages
+        languages = await self.get_available_languages()
 
-        # Update the user's audio configuration
-        self.database.update_language(str(context.author.id), language)
-        await context.send(f"言語を {language} に設定しました。")
+        # Create the dropdown
+        options = [SelectOption(label=f"{language['name']}", description=language['name'], emoji=language['flag']) for language in languages.values()]
+        dropdown = Dropdown(options, self.database, str(context.author.id), "言語を選択してください。")
+        view = DropdownView(dropdown)
+
+        # Send the message
+        await context.send("言語を選択してください。", view=view)
 
     #
     @commands.hybrid_command(
         name="setvoice",
         description="音声の種類を設定する。",
     )
-    async def set_voice(self, context: Context, voice: str) -> None:
+    async def set_voice(self, context: Context) -> None:
 
-        # Check if the voice is valid
+        # Defer the response
+        await context.defer()
+
+        # Get the user's settings
         settings = self.database.get_user_settings(str(context.author.id))
         if settings is None:
             self.database.add_user(str(context.author.id))
             settings = self.database.get_user_settings(str(context.author.id))
             return
+
+        # Get the available voices
         voices = await self.get_voice(settings["language"])
-        if voice not in [voice["name"] for voice in voices]:
-            await context.send("無効な音声です。利用可能な音声: " + ", ".join([voice["name"] for voice in voices]))
+        if len(voices) == 0:
+            await context.send("音声が見つかりませんでした。")
             return
 
-        # Update the user's audio configuration
-        self.database.update_voice(str(context.author.id), voice)
-        await context.send(f"音声を {voice} に設定しました.")
+        # Create the dropdown
+        options = [SelectOption(label=voice["name"], description=voice["name"]) for voice in voices]
+        dropdown = Dropdown(options, self.database, str(context.author.id), "音声を選択してください。")
+        view = DropdownView(dropdown)
+
+        # Send the message
+        await context.send("音声を選択してください。", view=view)
 
     #
     @commands.hybrid_command(
@@ -113,8 +164,76 @@ class Setting(commands.Cog, name="setting"):
         await context.send(f"読み上げ対象のチャンネルをこのチャンネルに設定しました。")
 
     #
-    async def get_voice(self, language: str) -> list[dict[str, str]]:
+    async def get_voice(self, language: str = "") -> list[dict[str, str]]:
         return await GoogleTTS().voices(language)
+
+    #
+    async def get_available_languages(self) -> dict[str, dict[str, str]]:
+        languages = {
+            "en-US": {
+                "name": "English (United States)",
+                "code": "en-US",
+                "flag": "🇺🇸",
+            },
+            "en-GB": {
+                "name": "English (United Kingdom)",
+                "code": "en-GB",
+                "flag": "🇬🇧",
+            },
+            "en-AU": {
+                "name": "English (Australia)",
+                "code": "en-AU",
+                "flag": "🇦🇺",
+            },
+            "en-IN": {
+                "name": "English (India)",
+                "code": "en-IN",
+                "flag": "🇮🇳",
+            },
+            "ja-JP": {
+                "name": "日本語",
+                "code": "ja-JP",
+                "flag": "🇯🇵",
+            },
+            "cmn-CN": {
+                "name": "普通话",
+                "code": "cmn-CN",
+                "flag": "🇨🇳",
+            },
+            "yue-HK": {
+                "name": "粤語",
+                "code": "yue-HK",
+                "flag": "🇭🇰",
+            },
+            "ko-KR": {
+                "name": "한국어",
+                "code": "ko-KR",
+                "flag": "🇰🇷",
+            },
+            "de-DE": {
+                "name": "Deutsch",
+                "code": "de-DE",
+                "flag": "🇩🇪",
+            },
+            "fr-FR": {
+                "name": "Français",
+                "code": "fr-FR",
+                "flag": "🇫🇷",
+            },
+            "es-ES": {
+                "name": "Español",
+                "code": "es-ES",
+                "flag": "🇪🇸",
+            },
+            "it-IT": {
+                "name": "Italiano",
+                "code": "it-IT",
+                "flag": "🇮🇹",
+            },
+        }
+
+        return languages
+
 
 #
 async def setup(bot: Bot) -> None:
