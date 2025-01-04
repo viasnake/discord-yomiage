@@ -39,6 +39,10 @@ class Yomiage(commands.Cog, name="yomiage"):
         if not context.guild:
             return
 
+        # Check if the message includes a URL
+        if "http" in context.content:
+            return
+
         # Check if the bot is already connected to a voice channel
         if not context.guild.voice_client:
             return
@@ -112,12 +116,14 @@ class Yomiage(commands.Cog, name="yomiage"):
 
     #
     async def get_target_channel_id(self, guild_id: int) -> int | None:
-        result = self.database.get_target_channel_id(str(guild_id))
 
+        # Get the target channel id
+        result = self.database.get_target_channel_id(str(guild_id))
         if result is None:
             self.logger.error(f"Failed to get target channel id for guild_id {guild_id}")
             return None
 
+        #
         return int(result)
 
     #
