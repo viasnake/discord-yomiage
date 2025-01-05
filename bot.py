@@ -85,7 +85,7 @@ class Discord(Bot):
             self.logger.info(f"Executed {executed_command} command by {context.author} (ID: {context.author.id}) in DMs")
 
     #
-    async def on_command_error(self, context: Context[Bot], exception: Exception) -> None:
+    async def on_command_error(self, context: Context, exception: Exception) -> None:
 
         #
         self.logger.error(f"An exception occurred: {exception}")
